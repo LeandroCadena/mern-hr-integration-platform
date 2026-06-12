@@ -1,0 +1,135 @@
+.dashboard-page {
+    display: flex;
+    min-height: 100vh;
+    background: #f4f6f8;
+    color: #1f2937;
+}
+
+.sidebar {
+    width: 260px;
+    background: #111827;
+    color: white;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidebar h2 {
+    margin-bottom: 32px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sidebar nav p {
+    cursor: pointer;
+    opacity: 0.85;
+}
+
+.sidebar nav p:hover {
+    opacity: 1;
+}
+
+.sidebar button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.dashboard-content {
+    flex: 1;
+    padding: 32px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+}
+
+.dashboard-header p {
+    margin-top: 8px;
+    color: #6b7280;
+}
+
+.role-badge {
+    background: #e5e7eb;
+    padding: 8px 14px;
+    border-radius: 999px;
+    text-transform: capitalize;
+    font-weight: 600;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.metric-card p {
+    margin: 0;
+    color: #6b7280;
+}
+
+.metric-card h2 {
+    margin: 12px 0 0;
+    font-size: 34px;
+}
+
+.sidebar nav a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.85;
+}
+
+.sidebar nav a:hover {
+    opacity: 1;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.data-table th,
+.data-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.data-table th {
+    background: #f9fafb;
+    font-weight: 700;
+}
+
+.status-success {
+    color: green;
+    font-weight: 700;
+}
+
+.status-failed {
+    color: red;
+    font-weight: 700;
+}
