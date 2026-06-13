@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import { useAuth } from "../context/AuthContext";
-import providerService from "../services/providerService";
 import companyService from "../services/companyService";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import integrationService from "../services/integrationService";
 
-const providerSchema = z.object({
+const integrationSchema = z.object({
     name: z.enum(["Workday", "ADP", "BambooHR"]),
     companyId: z.string().min(1, "Please select a company"),
 });
 
-const Providers = () => {
+const Integrations = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [providers, setProviders] = useState([]);
+    const [integrations, setIntegrations] = useState([]);
     const [companies, setCompanies] = useState([]);
     const {
         register,
@@ -24,18 +24,18 @@ const Providers = () => {
         reset,
         formState: { errors },
     } = useForm({
-        resolver: zodResolver(providerSchema),
+        resolver: zodResolver(integrationSchema),
         defaultValues: {
             name: "Workday",
             companyId: "",
         },
     });
 
-    const fetchProviders = async () => {
-        const providers =
-            await providerService.getProviders();
+    const fetchIntegrations = async () => {
+        const integrations =
+            await integrationService.getIntegrations();
 
-        setProviders(providers);
+        setIntegrations(integrations);
     };
 
     const fetchCompanies = async () => {
@@ -46,7 +46,7 @@ const Providers = () => {
     };
 
     useEffect(() => {
-        fetchProviders();
+        fetchIntegrations();
         fetchCompanies();
     }, []);
 
@@ -54,14 +54,14 @@ const Providers = () => {
         try {
             setLoading(true);
 
-            await providerService.createProvider(data);
+            await integrationService.createIntegration(data);
 
             reset({
                 name: "Workday",
                 companyId: "",
             });
 
-            await fetchProviders();
+            await fetchIntegrations();
 
             toast.success("Integration created successfully");
         } catch (error) {
@@ -100,15 +100,15 @@ const Providers = () => {
 
             <hr />
 
-            {providers.map((provider) => (
-                <div className="metric-card" key={provider._id}>
-                    <h3>{provider.name}</h3>
-                    <p>Status: {provider.status}</p>
-                    <p>Company: {provider.companyId?.name}</p>
+            {integrations.map((integration) => (
+                <div className="metric-card" key={integration._id}>
+                    <h3>{integration.name}</h3>
+                    <p>Status: {integration.status}</p>
+                    <p>Company: {integration.companyId?.name}</p>
                 </div>
             ))}
         </DashboardLayout>
     );
 };
 
-export default Providers;
+export default Integrations;

@@ -38,8 +38,8 @@ const Dashboard = () => {
                     </div>
 
                     <div className="metric-card">
-                        <p>Total Providers</p>
-                        <h2>{metrics.totalProviders}</h2>
+                        <p>Total Integrations</p>
+                        <h2>{metrics.totalIntegrations}</h2>
                     </div>
 
                     <div className="metric-card">

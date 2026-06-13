@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
-const providerRoutes = require("./routes/providerRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
 const syncLogRoutes = require("./routes/syncLogRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
@@ -21,7 +20,6 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/companies", companyRoutes);
-app.use("/api/providers", providerRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/sync-logs", syncLogRoutes);
 app.use("/api/dashboard", dashboardRoutes);
