@@ -4,15 +4,27 @@ import DashboardLayout from "../components/DashboardLayout";
 import { useAuth } from "../context/AuthContext";
 import companyService from "../services/companyService";
 import { toast } from "react-toastify";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const companySchema = z.object({
+    name: z.string().min(3, "Company name must have at least 3 characters"),
+    industry: z.string().min(2, "Industry is required"),
+    country: z.string().min(2, "Country is required"),
+});
 
 const Companies = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [companies, setCompanies] = useState([]);
-    const [form, setForm] = useState({
-        name: "",
-        industry: "",
-        country: "",
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+    } = useForm({
+        resolver: zodResolver(companySchema),
     });
 
 
@@ -25,19 +37,13 @@ const Companies = () => {
         fetchCompanies();
     }, []);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
+    const onSubmit = async (data) => {
         try {
             setLoading(true);
 
-            await companyService.createCompany(form);
+            await companyService.createCompany(data);
 
-            setForm({
-                name: "",
-                industry: "",
-                country: "",
-            });
+            reset();
 
             await fetchCompanies();
 
@@ -52,30 +58,15 @@ const Companies = () => {
     return (
         <DashboardLayout title="Companies">
             {user?.role === "admin" && (
-                <form onSubmit={handleSubmit}>
-                    <input
-                        placeholder="Company name"
-                        value={form.name}
-                        onChange={(e) =>
-                            setForm({ ...form, name: e.target.value })
-                        }
-                    />
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <input placeholder="Company name" {...register("name")} />
+                    {errors.name && <p>{errors.name.message}</p>}
 
-                    <input
-                        placeholder="Industry"
-                        value={form.industry}
-                        onChange={(e) =>
-                            setForm({ ...form, industry: e.target.value })
-                        }
-                    />
+                    <input placeholder="Industry" {...register("industry")} />
+                    {errors.industry && <p>{errors.industry.message}</p>}
 
-                    <input
-                        placeholder="Country"
-                        value={form.country}
-                        onChange={(e) =>
-                            setForm({ ...form, country: e.target.value })
-                        }
-                    />
+                    <input placeholder="Country" {...register("country")} />
+                    {errors.country && <p>{errors.country.message}</p>}
 
                     <button type="submit" disabled={loading}>
                         {loading ? "Creating..." : "Create Company"}

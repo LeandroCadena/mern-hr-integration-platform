@@ -3,14 +3,37 @@ import DashboardLayout from "../components/DashboardLayout";
 import employeeService from "../services/employeeService";
 import companyService from "../services/companyService";
 import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const importEmployeesSchema = z.object({
+    provider: z.enum(["Workday", "ADP"]),
+    companyId: z.string().min(1, "Please select a company"),
+});
 
 const Employees = () => {
+    const { user } = useAuth();
     const [employees, setEmployees] = useState([]);
     const [companies, setCompanies] = useState([]);
-    const [companyId, setCompanyId] = useState("");
     const [loading, setLoading] = useState(false);
-    const [provider, setProvider] = useState("Workday");
     const [search, setSearch] = useState("");
+    const {
+        register,
+        handleSubmit,
+        watch,
+        reset,
+        formState: { errors },
+    } = useForm({
+        resolver: zodResolver(importEmployeesSchema),
+        defaultValues: {
+            provider: "Workday",
+            companyId: "",
+        },
+    });
+
+    const provider = watch("provider");
 
     const fetchEmployees = async () => {
         const employees =
@@ -31,14 +54,9 @@ const Employees = () => {
         fetchCompanies();
     }, []);
 
-    const importMockEmployees = async () => {
-        if (!companyId) {
-            toast.warning("Please select a company before importing employees");
-            return;
-        }
-
+    const importMockEmployees = async (data) => {
         const mockEmployees =
-            provider === "Workday"
+            data.provider === "Workday"
                 ? [
                     {
                         workerId: "WD-1001",
@@ -65,41 +83,37 @@ const Employees = () => {
         try {
             setLoading(true);
 
-            await employeeService.importEmployees(payload);
+            await employeeService.importEmployees({
+                provider: data.provider,
+                companyId: data.companyId,
+                employees: mockEmployees,
+            });
 
-            fetchEmployees();
+            await fetchEmployees();
 
             toast.success("Employees imported successfully");
 
+            reset({
+                provider: "Workday",
+                companyId: "",
+            });
         } catch (error) {
-
             toast.error(error.response?.data?.message || "Import failed");
-
         } finally {
-
             setLoading(false);
-
         }
     };
 
     return (
         <DashboardLayout title="Employees">
             {["admin", "developer"].includes(user?.role) && (
-                <div className="metric-card">
-                    <h3>Import Mock Employees</h3>
-
-                    <select
-                        value={provider}
-                        onChange={(e) => setProvider(e.target.value)}
-                    >
+                <form onSubmit={handleSubmit(importMockEmployees)}>
+                    <select {...register("provider")}>
                         <option value="Workday">Workday</option>
                         <option value="ADP">ADP</option>
                     </select>
 
-                    <select
-                        value={companyId}
-                        onChange={(e) => setCompanyId(e.target.value)}
-                    >
+                    <select {...register("companyId")}>
                         <option value="">Select company</option>
 
                         {companies.map((company) => (
@@ -109,14 +123,12 @@ const Employees = () => {
                         ))}
                     </select>
 
-                    <button onClick={importMockEmployees} disabled={!companyId || loading}>
-                        {
-                            loading
-                                ? "Importing..."
-                                : "Import Employees"
-                        }
+                    {errors.companyId && <p>{errors.companyId.message}</p>}
+
+                    <button type="submit" disabled={loading}>
+                        {loading ? "Importing..." : "Import Employees"}
                     </button>
-                </div>
+                </form>
             )}
 
             <input

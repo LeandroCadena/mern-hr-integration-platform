@@ -7,7 +7,6 @@ import dashboardService from "../services/dashboardService";
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
-
     const [metrics, setMetrics] = useState(null);
     const [error, setError] = useState("");
 

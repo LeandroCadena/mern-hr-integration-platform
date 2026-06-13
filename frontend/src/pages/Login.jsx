@@ -5,7 +5,6 @@ import { useAuth } from "../context/AuthContext";
 const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
-
     const [email, setEmail] = useState("leandro@test.com");
     const [password, setPassword] = useState("123456");
     const [error, setError] = useState("");
