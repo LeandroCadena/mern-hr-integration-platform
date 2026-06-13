@@ -125,7 +125,51 @@ const importEmployees = async (req, res) => {
 
 const getEmployees = async (req, res) => {
     try {
-        const employees = await Employee.find()
+        const {
+            companyId,
+            provider,
+            search
+        } = req.query;
+
+        const filters = {};
+
+        if (companyId) {
+            filters.companyId = companyId;
+        }
+
+        if (provider) {
+            filters.provider = provider;
+        }
+
+        if (search) {
+            filters.$or = [{
+                    firstName: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+                {
+                    lastName: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+                {
+                    email: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+                {
+                    externalId: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+            ];
+        }
+
+        const employees = await Employee.find(filters)
             .populate("companyId")
             .sort({
                 createdAt: -1

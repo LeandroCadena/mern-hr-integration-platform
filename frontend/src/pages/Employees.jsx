@@ -20,6 +20,8 @@ const Employees = () => {
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
+    const [filterCompanyId, setFilterCompanyId] = useState("");
+    const [filterProvider, setFilterProvider] = useState("");
     const {
         register,
         handleSubmit,
@@ -37,8 +39,11 @@ const Employees = () => {
     const provider = watch("provider");
 
     const fetchEmployees = async () => {
-        const employees =
-            await employeeService.getEmployees();
+        const employees = await employeeService.getEmployees({
+            companyId: filterCompanyId,
+            provider: filterProvider,
+            search,
+        });
 
         setEmployees(employees);
     };
@@ -51,9 +56,12 @@ const Employees = () => {
     };
 
     useEffect(() => {
-        fetchEmployees();
         fetchCompanies();
     }, []);
+
+    useEffect(() => {
+        fetchEmployees();
+    }, [filterCompanyId, filterProvider]);
 
     const importMockEmployees = async (data) => {
         const mockEmployees =
@@ -222,11 +230,34 @@ const Employees = () => {
             )
             }
 
-            <input
-                placeholder="Search employee..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-            />
+            <button onClick={fetchEmployees}>Search</button>
+
+            <div className="metric-card">
+                <h3>Filters</h3>
+
+                <select
+                    value={filterCompanyId}
+                    onChange={(e) => setFilterCompanyId(e.target.value)}
+                >
+                    <option value="">All Companies</option>
+                    {companies.map((company) => (
+                        <option key={company._id} value={company._id}>
+                            {company.name}
+                        </option>
+                    ))}
+                </select>
+
+                <select
+                    value={filterProvider}
+                    onChange={(e) => setFilterProvider(e.target.value)}
+                >
+                    <option value="">All Providers</option>
+                    <option value="Workday">Workday</option>
+                    <option value="ADP">ADP</option>
+                </select>
+
+                <button onClick={fetchEmployees}>Apply Filters</button>
+            </div>
 
             <table className="data-table">
                 <thead>
@@ -241,14 +272,7 @@ const Employees = () => {
 
                 <tbody>
                     {employees
-                        .filter((employee) => {
-                            const fullName =
-                                `${employee.firstName} ${employee.lastName}`.toLowerCase();
-
-                            return fullName.includes(
-                                search.toLowerCase()
-                            );
-                        }).map((employee) => (
+                        .map((employee) => (
                             <tr key={employee._id}>
                                 <td>
                                     {employee.firstName} {employee.lastName}

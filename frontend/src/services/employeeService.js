@@ -1,7 +1,10 @@
 import api from "./api";
 
-const getEmployees = async () => {
-    const response = await api.get("/employees");
+const getEmployees = async (filters = {}) => {
+    const response = await api.get("/employees", {
+        params: filters,
+    });
+
     return response.data.employees;
 };
 
