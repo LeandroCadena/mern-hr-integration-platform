@@ -3,9 +3,11 @@ import DashboardLayout from "../components/DashboardLayout";
 import { useAuth } from "../context/AuthContext";
 import providerService from "../services/providerService";
 import companyService from "../services/companyService";
+import { toast } from "react-toastify";
 
 const Providers = () => {
     const { user } = useAuth();
+    const [loading, setLoading] = useState(false);
     const [providers, setProviders] = useState([]);
     const [companies, setCompanies] = useState([]);
 
@@ -36,16 +38,29 @@ const Providers = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        await providerService.createProvider(
-            form
-        );
+        if (!form.companyId) {
+            toast.warning("Please select a company");
+            return;
+        }
 
-        setForm({
-            name: "Workday",
-            companyId: "",
-        });
+        try {
+            setLoading(true);
 
-        fetchProviders();
+            await providerService.createProvider(form);
+
+            setForm({
+                name: "Workday",
+                companyId: "",
+            });
+
+            await fetchProviders();
+
+            toast.success("Provider connected successfully");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Could not connect provider");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -78,7 +93,9 @@ const Providers = () => {
                         ))}
                     </select>
 
-                    <button type="submit">Connect Provider</button>
+                    <button type="submit" disabled={loading}>
+                        {loading ? "Connecting..." : "Connect Provider"}
+                    </button>
                 </form>
             )}
 

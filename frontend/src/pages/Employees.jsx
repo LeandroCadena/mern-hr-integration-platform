@@ -33,7 +33,7 @@ const Employees = () => {
 
     const importMockEmployees = async () => {
         if (!companyId) {
-            alert("Please select a company before importing employees");
+            toast.warning("Please select a company before importing employees");
             return;
         }
 
@@ -65,8 +65,7 @@ const Employees = () => {
         try {
             setLoading(true);
 
-            await employeeService
-                .importEmployees(payload);
+            await employeeService.importEmployees(payload);
 
             fetchEmployees();
 
@@ -74,10 +73,7 @@ const Employees = () => {
 
         } catch (error) {
 
-            toast.error(
-                error.response?.data?.message ||
-                "Import failed"
-            );
+            toast.error(error.response?.data?.message || "Import failed");
 
         } finally {
 

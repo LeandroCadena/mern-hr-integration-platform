@@ -3,9 +3,11 @@ import "../styles/dashboard.css";
 import DashboardLayout from "../components/DashboardLayout";
 import { useAuth } from "../context/AuthContext";
 import companyService from "../services/companyService";
+import { toast } from "react-toastify";
 
 const Companies = () => {
     const { user } = useAuth();
+    const [loading, setLoading] = useState(false);
     const [companies, setCompanies] = useState([]);
     const [form, setForm] = useState({
         name: "",
@@ -26,15 +28,25 @@ const Companies = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        await companyService.createCompany(form);
+        try {
+            setLoading(true);
 
-        setForm({
-            name: "",
-            industry: "",
-            country: "",
-        });
+            await companyService.createCompany(form);
 
-        fetchCompanies();
+            setForm({
+                name: "",
+                industry: "",
+                country: "",
+            });
+
+            await fetchCompanies();
+
+            toast.success("Company created successfully");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Could not create company");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -65,7 +77,9 @@ const Companies = () => {
                         }
                     />
 
-                    <button type="submit">Create Company</button>
+                    <button type="submit" disabled={loading}>
+                        {loading ? "Creating..." : "Create Company"}
+                    </button>
                 </form>
             )}
 
