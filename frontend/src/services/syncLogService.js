@@ -5,7 +5,7 @@ const getSyncLogs = async (filters = {}) => {
         params: filters,
     });
 
-    return response.data.logs;
+    return response.data;
 };
 
 export default {

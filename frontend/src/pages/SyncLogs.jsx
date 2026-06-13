@@ -6,25 +6,33 @@ const SyncLogs = () => {
     const [logs, setLogs] = useState([]);
     const [statusFilter, setStatusFilter] = useState("");
     const [providerFilter, setProviderFilter] = useState("");
+    const [pagination, setPagination] = useState(null);
+    const [page, setPage] = useState(1);
 
     const fetchLogs = async () => {
-        const logs = await syncLogService.getSyncLogs({
+        const data = await syncLogService.getSyncLogs({
             status: statusFilter,
             provider: providerFilter,
+            page,
+            limit: 10,
         });
 
-        setLogs(logs);
+        setLogs(data.logs);
+        setPagination(data.pagination);
     };
 
     useEffect(() => {
         fetchLogs();
-    }, [statusFilter, providerFilter]);
+    }, [statusFilter, providerFilter, page]);
 
     return (
         <DashboardLayout title="Sync Logs">
             <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(1);
+                }}
             >
                 <option value="">All Statuses</option>
                 <option value="success">Success</option>
@@ -33,7 +41,10 @@ const SyncLogs = () => {
 
             <select
                 value={providerFilter}
-                onChange={(e) => setProviderFilter(e.target.value)}
+                onChange={(e) => {
+                    setProviderFilter(e.target.value);
+                    setPage(1);
+                }}
             >
                 <option value="">All Providers</option>
                 <option value="Workday">Workday</option>
@@ -73,6 +84,27 @@ const SyncLogs = () => {
                         ))}
                 </tbody>
             </table>
+            {pagination && (
+                <div>
+                    <button
+                        disabled={pagination.currentPage === 1}
+                        onClick={() => setPage((prev) => prev - 1)}
+                    >
+                        Previous
+                    </button>
+
+                    <span>
+                        Page {pagination.currentPage} of {pagination.totalPages}
+                    </span>
+
+                    <button
+                        disabled={pagination.currentPage === pagination.totalPages}
+                        onClick={() => setPage((prev) => prev + 1)}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </DashboardLayout>
     );
 };
