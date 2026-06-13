@@ -57,7 +57,7 @@ const simulateProviderSync = asyncHandler(async (req, res) => {
         integrationId
     } = req.params;
     const {
-        count = 5
+        count
     } = req.body;
 
     const integration = await Integration.findById(integrationId);

@@ -1,10 +1,17 @@
 const express = require("express");
+const validateRequest = require("../middleware/validateRequest");
+const {
+    createIntegrationSchema
+} = require("../schemas/integrationSchema");
+const {
+    simulateSyncBodySchema,
+    simulateSyncParamsSchema,
+} = require("../schemas/simulateSyncSchema");
 const {
     createIntegration,
     getIntegrations,
     simulateProviderSync,
 } = require("../controllers/integrationController");
-
 const {
     protect,
     authorize
@@ -12,12 +19,19 @@ const {
 
 const router = express.Router();
 
-router.post("/", protect, authorize("admin", "developer"), createIntegration);
+router.post(
+    "/",
+    protect,
+    authorize("admin", "developer"),
+    validateRequest(createIntegrationSchema),
+    createIntegration
+);
 router.get("/", protect, getIntegrations);
 router.post(
     "/:integrationId/simulate-sync",
     protect,
     authorize("admin", "developer"),
+    validateRequest(simulateSyncBodySchema, "body"),
     simulateProviderSync
 );
 
