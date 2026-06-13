@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
-import api from "../services/api";
+import employeeService from "../services/employeeService";
+import companyService from "../services/companyService";
 
 const Employees = () => {
     const [employees, setEmployees] = useState([]);
@@ -10,13 +11,17 @@ const Employees = () => {
     const [search, setSearch] = useState("");
 
     const fetchEmployees = async () => {
-        const response = await api.get("/employees");
-        setEmployees(response.data.employees);
+        const employees =
+            await employeeService.getEmployees();
+
+        setEmployees(employees);
     };
 
     const fetchCompanies = async () => {
-        const response = await api.get("/companies");
-        setCompanies(response.data.companies);
+        const companies =
+            await companyService.getCompanies();
+
+        setCompanies(companies);
     };
 
     useEffect(() => {
@@ -55,11 +60,9 @@ const Employees = () => {
                     },
                 ];
 
-        await api.post("/employees/import", {
-            provider,
-            companyId,
-            employees: mockEmployees,
-        });
+        await employeeService.importEmployees(
+            payload
+        );
 
         fetchEmployees();
         alert("Employees imported successfully");

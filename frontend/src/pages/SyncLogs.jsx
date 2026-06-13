@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
-import api from "../services/api";
+import syncLogService from "../services/syncLogService";
 
 const SyncLogs = () => {
     const [logs, setLogs] = useState([]);
 
     const fetchLogs = async () => {
-        const response = await api.get("/sync-logs");
-        setLogs(response.data.logs);
+        const logs =
+            await syncLogService.getSyncLogs();
+
+        setLogs(logs);
     };
 
     useEffect(() => {

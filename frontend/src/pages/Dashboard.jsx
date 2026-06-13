@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import api from "../services/api";
 import "../styles/dashboard.css";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
+import dashboardService from "../services/dashboardService";
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -14,8 +14,10 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchMetrics = async () => {
             try {
-                const response = await api.get("/dashboard/metrics");
-                setMetrics(response.data);
+                const metrics =
+                    await dashboardService.getMetrics();
+
+                setMetrics(metrics);
             } catch (error) {
                 setError("Could not load dashboard metrics");
             }

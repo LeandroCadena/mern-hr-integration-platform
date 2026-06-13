@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
-import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import providerService from "../services/providerService";
+import companyService from "../services/companyService";
 
 const Providers = () => {
     const { user } = useAuth();
@@ -14,13 +15,17 @@ const Providers = () => {
     });
 
     const fetchProviders = async () => {
-        const response = await api.get("/providers");
-        setProviders(response.data.providers);
+        const providers =
+            await providerService.getProviders();
+
+        setProviders(providers);
     };
 
     const fetchCompanies = async () => {
-        const response = await api.get("/companies");
-        setCompanies(response.data.companies);
+        const companies =
+            await companyService.getCompanies();
+
+        setCompanies(companies);
     };
 
     useEffect(() => {
@@ -31,7 +36,9 @@ const Providers = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        await api.post("/providers", form);
+        await providerService.createProvider(
+            form
+        );
 
         setForm({
             name: "Workday",

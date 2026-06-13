@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
 import "../styles/dashboard.css";
 import DashboardLayout from "../components/DashboardLayout";
 import { useAuth } from "../context/AuthContext";
+import companyService from "../services/companyService";
 
 const Companies = () => {
     const { user } = useAuth();
@@ -15,8 +15,8 @@ const Companies = () => {
 
 
     const fetchCompanies = async () => {
-        const response = await api.get("/companies");
-        setCompanies(response.data.companies);
+        const companies = await companyService.getCompanies();
+        setCompanies(companies);
     };
 
     useEffect(() => {
@@ -26,7 +26,7 @@ const Companies = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        await api.post("/companies", form);
+        await companyService.createCompany(form);
 
         setForm({
             name: "",
