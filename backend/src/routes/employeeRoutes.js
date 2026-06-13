@@ -1,4 +1,8 @@
 const express = require("express");
+const validateRequest = require("../middleware/validateRequest");
+const {
+    employeeImportSchema
+} = require("../schemas/employeeSchema");
 const {
     importEmployees,
     getEmployees,
@@ -11,7 +15,7 @@ const {
 
 const router = express.Router();
 
-router.post("/import", protect, authorize("admin", "developer"), importEmployees);
+router.post("/import", protect, authorize("admin", "developer"), validateRequest(employeeImportSchema), importEmployees);
 router.get("/", protect, getEmployees);
 
 module.exports = router;
