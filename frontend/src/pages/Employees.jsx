@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import EmployeeCsvUpload from "../components/EmployeeCsvUpload";
 
 const importEmployeesSchema = z.object({
     provider: z.enum(["Workday", "ADP"]),
@@ -104,32 +105,80 @@ const Employees = () => {
         }
     };
 
+    const importCsvEmployees = async (employees) => {
+        const selectedCompanyId = watch("companyId");
+
+        if (!selectedCompanyId) {
+            toast.warning("Please select a company before importing CSV");
+            return;
+        }
+
+        if (!employees.length) {
+            toast.warning("CSV file is empty");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            await employeeService.importEmployees({
+                provider,
+                companyId: selectedCompanyId,
+                employees,
+            });
+
+            await fetchEmployees();
+
+            toast.success("CSV imported successfully");
+        } catch (error) {
+            toast.error(error.response?.data?.message || "CSV import failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <DashboardLayout title="Employees">
             {["admin", "developer"].includes(user?.role) && (
-                <form onSubmit={handleSubmit(importMockEmployees)}>
-                    <select {...register("provider")}>
-                        <option value="Workday">Workday</option>
-                        <option value="ADP">ADP</option>
-                    </select>
+                <div className="metric-card">
+                    <form onSubmit={handleSubmit(importMockEmployees)}>
+                        <select {...register("provider")}>
+                            <option value="Workday">Workday</option>
+                            <option value="ADP">ADP</option>
+                        </select>
 
-                    <select {...register("companyId")}>
-                        <option value="">Select company</option>
+                        <select {...register("companyId")}>
+                            <option value="">Select company</option>
 
-                        {companies.map((company) => (
-                            <option key={company._id} value={company._id}>
-                                {company.name}
-                            </option>
-                        ))}
-                    </select>
+                            {companies.map((company) => (
+                                <option key={company._id} value={company._id}>
+                                    {company.name}
+                                </option>
+                            ))}
+                        </select>
 
-                    {errors.companyId && <p>{errors.companyId.message}</p>}
+                        {errors.companyId && <p>{errors.companyId.message}</p>}
 
-                    <button type="submit" disabled={loading}>
-                        {loading ? "Importing..." : "Import Employees"}
-                    </button>
-                </form>
-            )}
+                        <button type="submit" disabled={loading}>
+                            {loading ? "Importing..." : "Import Employees"}
+                        </button>
+                    </form>
+
+                    <hr />
+
+                    <h3>Import Employees From CSV</h3>
+
+                    <EmployeeCsvUpload
+                        onImport={importCsvEmployees}
+                    />
+
+                    <p>
+                        Expected CSV columns depend on selected provider.
+                    </p>
+
+                </div>
+            )
+            }
 
             <input
                 placeholder="Search employee..."
@@ -174,7 +223,7 @@ const Employees = () => {
                         ))}
                 </tbody>
             </table>
-        </DashboardLayout>
+        </DashboardLayout >
     );
 };
 
