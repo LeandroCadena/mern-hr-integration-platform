@@ -10,7 +10,18 @@ const createIntegration = async (integration) => {
     return response.data;
 };
 
+const simulateSync = async (integrationId, count) => {
+    const response = await api.post(
+        `/integrations/${integrationId}/simulate-sync`, {
+            count
+        }
+    );
+
+    return response.data;
+};
+
 export default {
     getIntegrations,
     createIntegration,
+    simulateSync,
 };

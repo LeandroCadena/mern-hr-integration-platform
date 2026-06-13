@@ -18,6 +18,7 @@ const Integrations = () => {
     const [loading, setLoading] = useState(false);
     const [integrations, setIntegrations] = useState([]);
     const [companies, setCompanies] = useState([]);
+    const [syncCounts, setSyncCounts] = useState({});
     const {
         register,
         handleSubmit,
@@ -71,6 +72,27 @@ const Integrations = () => {
         }
     };
 
+    const handleSimulateSync = async (integrationId, count) => {
+        try {
+            setLoading(true);
+
+            const result = await integrationService.simulateSync(
+                integrationId,
+                count
+            );
+
+            await fetchIntegrations();
+
+            toast.success(
+                `Sync completed: ${result.inserted} inserted, ${result.updated} updated`
+            );
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Sync failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <DashboardLayout title="Integrations">
             {["admin", "developer"].includes(user?.role) && (
@@ -105,6 +127,35 @@ const Integrations = () => {
                     <h3>{integration.name}</h3>
                     <p>Status: {integration.status}</p>
                     <p>Company: {integration.companyId?.name}</p>
+                    {["admin", "developer"].includes(user?.role) && (
+                        <>
+                            <input
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={syncCounts[integration._id] || 5}
+                                onChange={(e) =>
+                                    setSyncCounts({
+                                        ...syncCounts,
+                                        [integration._id]: e.target.value,
+                                    })
+                                }
+                            />
+
+                            <button
+                                type="button"
+                                disabled={loading}
+                                onClick={() =>
+                                    handleSimulateSync(
+                                        integration._id,
+                                        syncCounts[integration._id] || 5
+                                    )
+                                }
+                            >
+                                {loading ? "Syncing..." : "Simulate Provider Sync"}
+                            </button>
+                        </>
+                    )}
                 </div>
             ))}
         </DashboardLayout>
