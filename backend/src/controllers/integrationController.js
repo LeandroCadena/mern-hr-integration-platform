@@ -18,6 +18,17 @@ const createIntegration = async (req, res) => {
             companyId
         } = req.body;
 
+        const existingIntegration = await Integration.findOne({
+            companyId,
+            providerName,
+        });
+
+        if (existingIntegration) {
+            return res.status(400).json({
+                message: `${providerName} integration already exists for this company`,
+            });
+        }
+
         const integration = await Integration.create({
             providerName,
             companyId,

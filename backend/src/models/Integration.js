@@ -27,4 +27,11 @@ const integrationSchema = new mongoose.Schema({
     timestamps: true
 });
 
+integrationSchema.index({
+    companyId: 1,
+    providerName: 1,
+}, {
+    unique: true,
+});
+
 module.exports = mongoose.model("Integration", integrationSchema);
