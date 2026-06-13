@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../components/DashboardLayout";
 import employeeService from "../services/employeeService";
 import companyService from "../services/companyService";
+import { toast } from "react-toastify";
 
 const Employees = () => {
     const [employees, setEmployees] = useState([]);
     const [companies, setCompanies] = useState([]);
     const [companyId, setCompanyId] = useState("");
+    const [loading, setLoading] = useState(false);
     const [provider, setProvider] = useState("Workday");
     const [search, setSearch] = useState("");
 
@@ -60,12 +62,28 @@ const Employees = () => {
                     },
                 ];
 
-        await employeeService.importEmployees(
-            payload
-        );
+        try {
+            setLoading(true);
 
-        fetchEmployees();
-        alert("Employees imported successfully");
+            await employeeService
+                .importEmployees(payload);
+
+            fetchEmployees();
+
+            toast.success("Employees imported successfully");
+
+        } catch (error) {
+
+            toast.error(
+                error.response?.data?.message ||
+                "Import failed"
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
     };
 
     return (
@@ -95,8 +113,12 @@ const Employees = () => {
                         ))}
                     </select>
 
-                    <button onClick={importMockEmployees} disabled={!companyId}>
-                        Import Employees
+                    <button onClick={importMockEmployees} disabled={!companyId || loading}>
+                        {
+                            loading
+                                ? "Importing..."
+                                : "Import Employees"
+                        }
                     </button>
                 </div>
             )}

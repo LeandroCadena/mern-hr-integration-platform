@@ -6,6 +6,8 @@ import Providers from "./pages/Providers";
 import Employees from "./pages/Employees";
 import SyncLogs from "./pages/SyncLogs";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -19,6 +21,10 @@ function App() {
         <Route path="/employees" element={<ProtectedRoute><Employees /></ProtectedRoute>} />
         <Route path="/sync-logs" element={<ProtectedRoute><SyncLogs /></ProtectedRoute>} />
       </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+      />
     </BrowserRouter>
   );
 }
