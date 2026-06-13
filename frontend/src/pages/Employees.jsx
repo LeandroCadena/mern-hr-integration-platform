@@ -24,6 +24,7 @@ const Employees = () => {
     const [filterProvider, setFilterProvider] = useState("");
     const [pagination, setPagination] = useState(null);
     const [page, setPage] = useState(1);
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const {
         register,
         handleSubmit,
@@ -44,7 +45,7 @@ const Employees = () => {
         const data = await employeeService.getEmployees({
             companyId: filterCompanyId,
             provider: filterProvider,
-            search,
+            search: debouncedSearch,
             page,
             limit: 10,
         });
@@ -66,7 +67,16 @@ const Employees = () => {
 
     useEffect(() => {
         fetchEmployees();
-    }, [filterCompanyId, filterProvider, page]);
+    }, [filterCompanyId, filterProvider, page, debouncedSearch]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setDebouncedSearch(search);
+            setPage(1);
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [search]);
 
     const importMockEmployees = async (data) => {
         const mockEmployees =

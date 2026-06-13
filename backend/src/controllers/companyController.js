@@ -1,42 +1,37 @@
 const Company = require("../models/Company");
+const asyncHandler = require("../utils/asyncHandler");
 
-const createCompany = async (req, res) => {
-    try {
-        const { name, industry, country } = req.body;
+const createCompany = asyncHandler(async (req, res) => {
+    const {
+        name,
+        industry,
+        country
+    } = req.body;
 
-        const company = await Company.create({
-            name,
-            industry,
-            country,
-            createdBy: req.user._id,
-        });
+    const company = await Company.create({
+        name,
+        industry,
+        country,
+        createdBy: req.user._id,
+    });
 
-        res.status(201).json({
-            message: "Company created successfully",
-            company,
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Create company error",
-            error: error.message,
-        });
-    }
-};
+    res.status(201).json({
+        message: "Company created successfully",
+        company,
+    });
+});
 
-const getCompanies = async (req, res) => {
-    try {
-        const companies = await Company.find({
-            createdBy: req.user._id,
-        }).sort({ createdAt: -1 });
+const getCompanies = asyncHandler(async (req, res) => {
+    const companies = await Company.find({
+        createdBy: req.user._id,
+    }).sort({
+        createdAt: -1
+    });
 
-        res.json({ companies });
-    } catch (error) {
-        res.status(500).json({
-            message: "Get companies error",
-            error: error.message,
-        });
-    }
-};
+    res.json({
+        companies
+    });
+});
 
 module.exports = {
     createCompany,

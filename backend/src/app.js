@@ -6,6 +6,9 @@ const employeeRoutes = require("./routes/employeeRoutes");
 const syncLogRoutes = require("./routes/syncLogRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const integrationRoutes = require("./routes/integrationRoutes");
+const {
+    errorHandler
+} = require("./middleware/errorMiddleware");
 
 const app = express();
 
@@ -24,5 +27,6 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/sync-logs", syncLogRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/integrations", integrationRoutes);
+app.use(errorHandler);
 
 module.exports = app;

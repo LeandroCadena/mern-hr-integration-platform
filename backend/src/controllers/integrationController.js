@@ -1,6 +1,7 @@
 const Integration = require("../models/Integration");
 const Employee = require("../models/Employee");
 const SyncLog = require("../models/SyncLog");
+const asyncHandler = require("../utils/asyncHandler");
 const {
     generateMockEmployees
 } = require("../services/mockProviderService");
@@ -11,138 +12,117 @@ const {
     normalizeADPEmployee
 } = require("../adapters/adpAdapter");
 
-const createIntegration = async (req, res) => {
-    try {
-        const {
-            providerName,
-            companyId
-        } = req.body;
+const createIntegration = asyncHandler(async (req, res) => {
+    const {
+        providerName,
+        companyId
+    } = req.body;
 
-        const existingIntegration = await Integration.findOne({
-            companyId,
-            providerName,
+    const existingIntegration = await Integration.findOne({
+        companyId,
+        providerName,
+    });
+
+    if (existingIntegration) {
+        res.status(400);
+        throw new Error(`${providerName} integration already exists for this company`);
+    }
+
+    const integration = await Integration.create({
+        providerName,
+        companyId,
+        status: "connected",
+    });
+
+    res.status(201).json({
+        message: "Integration created successfully",
+        integration,
+    });
+});
+
+const getIntegrations = asyncHandler(async (req, res) => {
+    const integrations = await Integration.find()
+        .populate("companyId")
+        .sort({
+            createdAt: -1
         });
 
-        if (existingIntegration) {
-            return res.status(400).json({
-                message: `${providerName} integration already exists for this company`,
-            });
-        }
+    res.json({
+        integrations
+    });
+});
 
-        const integration = await Integration.create({
-            providerName,
-            companyId,
-            status: "connected",
-        });
+const simulateProviderSync = asyncHandler(async (req, res) => {
+    const {
+        integrationId
+    } = req.params;
+    const {
+        count = 5
+    } = req.body;
 
-        res.status(201).json({
-            message: "Integration created successfully",
-            integration,
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Create integration error",
-            error: error.message,
+    const integration = await Integration.findById(integrationId);
+
+    if (!integration) {
+        return res.status(404).json({
+            message: "Integration not found",
         });
     }
-};
 
-const getIntegrations = async (req, res) => {
-    try {
-        const integrations = await Integration.find()
-            .populate("companyId")
-            .sort({
-                createdAt: -1
-            });
+    const providerName = integration.providerName;
+    const companyId = integration.companyId;
 
-        res.json({
-            integrations
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Get integrations error",
-            error: error.message,
-        });
-    }
-};
+    const mockEmployees = generateMockEmployees(providerName, Number(count));
 
-const simulateProviderSync = async (req, res) => {
-    try {
-        const {
-            integrationId
-        } = req.params;
-        const {
-            count = 5
-        } = req.body;
+    const normalizedEmployees =
+        providerName === "Workday" ?
+        mockEmployees.map(normalizeWorkdayEmployee) :
+        mockEmployees.map(normalizeADPEmployee);
 
-        const integration = await Integration.findById(integrationId);
+    const employeesToUpsert = normalizedEmployees.map((employee) => ({
+        ...employee,
+        provider: providerName,
+        companyId,
+    }));
 
-        if (!integration) {
-            return res.status(404).json({
-                message: "Integration not found",
-            });
-        }
-
-        const providerName = integration.providerName;
-        const companyId = integration.companyId;
-
-        const mockEmployees = generateMockEmployees(providerName, Number(count));
-
-        const normalizedEmployees =
-            providerName === "Workday" ?
-            mockEmployees.map(normalizeWorkdayEmployee) :
-            mockEmployees.map(normalizeADPEmployee);
-
-        const employeesToUpsert = normalizedEmployees.map((employee) => ({
-            ...employee,
-            provider: providerName,
-            companyId,
-        }));
-
-        const operations = employeesToUpsert.map((employee) => ({
-            updateOne: {
-                filter: {
-                    companyId: employee.companyId,
-                    provider: employee.provider,
-                    externalId: employee.externalId,
-                },
-                update: {
-                    $set: employee,
-                },
-                upsert: true,
+    const operations = employeesToUpsert.map((employee) => ({
+        updateOne: {
+            filter: {
+                companyId: employee.companyId,
+                provider: employee.provider,
+                externalId: employee.externalId,
             },
-        }));
+            update: {
+                $set: employee,
+            },
+            upsert: true,
+        },
+    }));
 
-        const result = await Employee.bulkWrite(operations);
+    const result = await Employee.bulkWrite(operations);
 
-        await Integration.findByIdAndUpdate(integrationId, {
-            status: "connected",
-            lastSyncAt: new Date(),
-        });
+    await Integration.findByIdAndUpdate(integrationId, {
+        status: "connected",
+        lastSyncAt: new Date(),
+    });
 
-        await SyncLog.create({
-            provider: providerName,
-            companyId,
-            status: "success",
-            recordsProcessed: employeesToUpsert.length,
-            insertedRecords: result.upsertedCount,
-            updatedRecords: result.modifiedCount,
-            triggeredBy: req.user._id,
-        });
+    await SyncLog.create({
+        provider: providerName,
+        companyId,
+        status: "success",
+        recordsProcessed: employeesToUpsert.length,
+        insertedRecords: result.upsertedCount,
+        updatedRecords: result.modifiedCount,
+        triggeredBy: req.user._id,
+    });
 
-        res.json({
-            message: "Provider sync simulated successfully",
-            recordsProcessed: employeesToUpsert.length,
-            inserted: result.upsertedCount,
-            updated: result.modifiedCount,
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Simulate provider sync error",
-            error: error.message,
-        });
-    }
-};
+    res.json({
+        message: "Provider sync simulated successfully",
+        recordsProcessed: employeesToUpsert.length,
+        inserted: result.upsertedCount,
+        updated: result.modifiedCount,
+    });
+
+});
 
 module.exports = {
     createIntegration,

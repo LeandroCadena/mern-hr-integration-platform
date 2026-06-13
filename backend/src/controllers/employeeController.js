@@ -7,6 +7,7 @@ const {
 } = require("../adapters/adpAdapter");
 const SyncLog = require("../models/SyncLog");
 const Integration = require("../models/Integration");
+const asyncHandler = require("../utils/asyncHandler");
 
 const importEmployees = async (req, res) => {
     try {
@@ -123,82 +124,75 @@ const importEmployees = async (req, res) => {
     }
 };
 
-const getEmployees = async (req, res) => {
-    try {
-        const {
-            companyId,
-            provider,
-            search,
-            page = 1,
-            limit = 10,
-        } = req.query;
+const getEmployees = asyncHandler(async (req, res) => {
+    const {
+        companyId,
+        provider,
+        search,
+        page = 1,
+        limit = 10,
+    } = req.query;
 
-        const filters = {};
+    const filters = {};
 
-        if (companyId) {
-            filters.companyId = companyId;
-        }
-
-        if (provider) {
-            filters.provider = provider;
-        }
-
-        if (search) {
-            filters.$or = [{
-                    firstName: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                },
-                {
-                    lastName: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                },
-                {
-                    email: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                },
-                {
-                    externalId: {
-                        $regex: search,
-                        $options: "i"
-                    }
-                },
-            ];
-        }
-
-        const skip = (Number(page) - 1) * Number(limit);
-
-        const employees = await Employee.find(filters)
-            .populate("companyId")
-            .sort({
-                createdAt: -1
-            })
-            .skip(skip)
-            .limit(Number(limit));
-
-        const totalEmployees = await Employee.countDocuments(filters);
-
-        res.json({
-            employees,
-            pagination: {
-                totalEmployees,
-                currentPage: Number(page),
-                totalPages: Math.ceil(totalEmployees / Number(limit)),
-                limit: Number(limit),
-            },
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Get employees error",
-            error: error.message,
-        });
+    if (companyId) {
+        filters.companyId = companyId;
     }
-};
+
+    if (provider) {
+        filters.provider = provider;
+    }
+
+    if (search) {
+        filters.$or = [{
+                firstName: {
+                    $regex: search,
+                    $options: "i"
+                }
+            },
+            {
+                lastName: {
+                    $regex: search,
+                    $options: "i"
+                }
+            },
+            {
+                email: {
+                    $regex: search,
+                    $options: "i"
+                }
+            },
+            {
+                externalId: {
+                    $regex: search,
+                    $options: "i"
+                }
+            },
+        ];
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const employees = await Employee.find(filters)
+        .populate("companyId")
+        .sort({
+            createdAt: -1
+        })
+        .skip(skip)
+        .limit(Number(limit));
+
+    const totalEmployees = await Employee.countDocuments(filters);
+
+    res.json({
+        employees,
+        pagination: {
+            totalEmployees,
+            currentPage: Number(page),
+            totalPages: Math.ceil(totalEmployees / Number(limit)),
+            limit: Number(limit),
+        },
+    });
+});
 
 module.exports = {
     importEmployees,
