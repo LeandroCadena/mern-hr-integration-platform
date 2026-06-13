@@ -4,7 +4,7 @@ const providerSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            enum: ["ADP", "Workday", "BambooHR"],
+            enum: ["ADP", "Workday"],
             required: true,
         },
 

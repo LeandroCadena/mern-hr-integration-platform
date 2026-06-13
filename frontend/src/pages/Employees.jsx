@@ -105,6 +105,39 @@ const Employees = () => {
         }
     };
 
+    const validateCsvColumns = (employees, selectedProvider) => {
+        const requiredColumns =
+            selectedProvider === "Workday"
+                ? ["workerId", "first_name", "last_name", "work_email"]
+                : ["associateId", "givenName", "familyName", "email"];
+
+        const firstRow = employees[0];
+
+        return requiredColumns.every((column) =>
+            Object.prototype.hasOwnProperty.call(firstRow, column)
+        );
+    };
+
+    const downloadCsvTemplate = () => {
+        const headers =
+            provider === "Workday"
+                ? "workerId,first_name,last_name,work_email\n"
+                : "associateId,givenName,familyName,email\n";
+
+        const blob = new Blob([headers], {
+            type: "text/csv;charset=utf-8;",
+        });
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${provider.toLowerCase()}-employee-template.csv`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+    };
+
     const importCsvEmployees = async (employees) => {
         const selectedCompanyId = watch("companyId");
 
@@ -115,6 +148,11 @@ const Employees = () => {
 
         if (!employees.length) {
             toast.warning("CSV file is empty");
+            return;
+        }
+
+        if (!validateCsvColumns(employees, provider)) {
+            toast.error(`Invalid CSV columns for ${provider}`);
             return;
         }
 
@@ -167,6 +205,10 @@ const Employees = () => {
                     <hr />
 
                     <h3>Import Employees From CSV</h3>
+
+                    <button type="button" onClick={downloadCsvTemplate}>
+                        Download CSV Template
+                    </button>
 
                     <EmployeeCsvUpload
                         onImport={importCsvEmployees}
