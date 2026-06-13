@@ -5,7 +5,7 @@ const getEmployees = async (filters = {}) => {
         params: filters,
     });
 
-    return response.data.employees;
+    return response.data;
 };
 
 const importEmployees = async (payload) => {

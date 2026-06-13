@@ -22,6 +22,8 @@ const Employees = () => {
     const [search, setSearch] = useState("");
     const [filterCompanyId, setFilterCompanyId] = useState("");
     const [filterProvider, setFilterProvider] = useState("");
+    const [pagination, setPagination] = useState(null);
+    const [page, setPage] = useState(1);
     const {
         register,
         handleSubmit,
@@ -39,13 +41,16 @@ const Employees = () => {
     const provider = watch("provider");
 
     const fetchEmployees = async () => {
-        const employees = await employeeService.getEmployees({
+        const data = await employeeService.getEmployees({
             companyId: filterCompanyId,
             provider: filterProvider,
             search,
+            page,
+            limit: 10,
         });
 
-        setEmployees(employees);
+        setEmployees(data.employees);
+        setPagination(data.pagination);
     };
 
     const fetchCompanies = async () => {
@@ -61,7 +66,7 @@ const Employees = () => {
 
     useEffect(() => {
         fetchEmployees();
-    }, [filterCompanyId, filterProvider]);
+    }, [filterCompanyId, filterProvider, page]);
 
     const importMockEmployees = async (data) => {
         const mockEmployees =
@@ -237,7 +242,10 @@ const Employees = () => {
 
                 <select
                     value={filterCompanyId}
-                    onChange={(e) => setFilterCompanyId(e.target.value)}
+                    onChange={(e) => {
+                        setFilterCompanyId(e.target.value);
+                        setPage(1);
+                    }}
                 >
                     <option value="">All Companies</option>
                     {companies.map((company) => (
@@ -249,7 +257,10 @@ const Employees = () => {
 
                 <select
                     value={filterProvider}
-                    onChange={(e) => setFilterProvider(e.target.value)}
+                    onChange={(e) => {
+                        setFilterProvider(e.target.value);
+                        setPage(1);
+                    }}
                 >
                     <option value="">All Providers</option>
                     <option value="Workday">Workday</option>
@@ -289,6 +300,27 @@ const Employees = () => {
                         ))}
                 </tbody>
             </table>
+            {pagination && (
+                <div>
+                    <button
+                        disabled={pagination.currentPage === 1}
+                        onClick={() => setPage((prev) => prev - 1)}
+                    >
+                        Previous
+                    </button>
+
+                    <span>
+                        Page {pagination.currentPage} of {pagination.totalPages}
+                    </span>
+
+                    <button
+                        disabled={pagination.currentPage === pagination.totalPages}
+                        onClick={() => setPage((prev) => prev + 1)}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </DashboardLayout >
     );
 };
