@@ -6,6 +6,7 @@ const providerRoutes = require("./routes/providerRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
 const syncLogRoutes = require("./routes/syncLogRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const integrationRoutes = require("./routes/integrationRoutes");
 
 const app = express();
 
@@ -24,5 +25,6 @@ app.use("/api/providers", providerRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/sync-logs", syncLogRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/integrations", integrationRoutes);
 
 module.exports = app;

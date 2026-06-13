@@ -21,7 +21,7 @@ const DashboardLayout = ({ children, title }) => {
                     <nav>
                         <Link to="/dashboard">Dashboard</Link>
                         <Link to="/companies">Companies</Link>
-                        <Link to="/providers">Providers</Link>
+                        <Link to="/integrations">Integrations</Link>
                         <Link to="/employees">Employees</Link>
                         <Link to="/sync-logs">Sync Logs</Link>
                     </nav>

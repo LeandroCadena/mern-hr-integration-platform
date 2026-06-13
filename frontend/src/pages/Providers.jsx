@@ -63,16 +63,16 @@ const Providers = () => {
 
             await fetchProviders();
 
-            toast.success("Provider connected successfully");
+            toast.success("Integration created successfully");
         } catch (error) {
-            toast.error(error.response?.data?.message || "Could not connect provider");
+            toast.error(error.response?.data?.message || "Could not create integration");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <DashboardLayout title="Providers">
+        <DashboardLayout title="Integrations">
             {["admin", "developer"].includes(user?.role) && (
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <select {...register("name")}>
@@ -93,7 +93,7 @@ const Providers = () => {
                     {errors.companyId && <p>{errors.companyId.message}</p>}
 
                     <button type="submit" disabled={loading}>
-                        {loading ? "Connecting..." : "Connect Provider"}
+                        {loading ? "Creating..." : "Create Integration"}
                     </button>
                 </form>
             )}
