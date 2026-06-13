@@ -9,7 +9,7 @@ import { z } from "zod";
 import integrationService from "../services/integrationService";
 
 const integrationSchema = z.object({
-    name: z.enum(["Workday", "ADP", "BambooHR"]),
+    providerName: z.enum(["Workday", "ADP", "BambooHR"]),
     companyId: z.string().min(1, "Please select a company"),
 });
 
@@ -19,6 +19,7 @@ const Integrations = () => {
     const [integrations, setIntegrations] = useState([]);
     const [companies, setCompanies] = useState([]);
     const [syncCounts, setSyncCounts] = useState({});
+    const [syncResults, setSyncResults] = useState({});
     const {
         register,
         handleSubmit,
@@ -27,7 +28,7 @@ const Integrations = () => {
     } = useForm({
         resolver: zodResolver(integrationSchema),
         defaultValues: {
-            name: "Workday",
+            providerName: "Workday",
             companyId: "",
         },
     });
@@ -52,13 +53,14 @@ const Integrations = () => {
     }, []);
 
     const onSubmit = async (data) => {
+        console.log("Submitting integration:", data);
         try {
             setLoading(true);
 
             await integrationService.createIntegration(data);
 
             reset({
-                name: "Workday",
+                providerName: "Workday",
                 companyId: "",
             });
 
@@ -81,6 +83,11 @@ const Integrations = () => {
                 count
             );
 
+            setSyncResults({
+                ...syncResults,
+                [integrationId]: result,
+            });
+
             await fetchIntegrations();
 
             toast.success(
@@ -97,7 +104,7 @@ const Integrations = () => {
         <DashboardLayout title="Integrations">
             {["admin", "developer"].includes(user?.role) && (
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <select {...register("name")}>
+                    <select {...register("providerName")}>
                         <option value="Workday">Workday</option>
                         <option value="ADP">ADP</option>
                         <option value="BambooHR">BambooHR</option>
@@ -112,6 +119,7 @@ const Integrations = () => {
                         ))}
                     </select>
 
+                    {errors.providerName && <p>{errors.providerName.message}</p>}
                     {errors.companyId && <p>{errors.companyId.message}</p>}
 
                     <button type="submit" disabled={loading}>
@@ -124,7 +132,7 @@ const Integrations = () => {
 
             {integrations.map((integration) => (
                 <div className="metric-card" key={integration._id}>
-                    <h3>{integration.name}</h3>
+                    <h3>{integration.providerName}</h3>
                     <p>Status: {integration.status}</p>
                     <p>Company: {integration.companyId?.name}</p>
                     {["admin", "developer"].includes(user?.role) && (
@@ -154,6 +162,12 @@ const Integrations = () => {
                             >
                                 {loading ? "Syncing..." : "Simulate Provider Sync"}
                             </button>
+                            {syncResults[integration._id] && (
+                                <p>
+                                    Last result: {syncResults[integration._id].inserted} inserted,{" "}
+                                    {syncResults[integration._id].updated} updated
+                                </p>
+                            )}
                         </>
                     )}
                 </div>

@@ -27,6 +27,8 @@ const SyncLogs = () => {
                         <th>Company</th>
                         <th>Triggered By</th>
                         <th>Date</th>
+                        <th>Inserted</th>
+                        <th>Updated</th>
                     </tr>
                 </thead>
 
@@ -41,6 +43,8 @@ const SyncLogs = () => {
                             <td>{log.companyId?.name}</td>
                             <td>{log.triggeredBy?.email}</td>
                             <td>{new Date(log.createdAt).toLocaleString()}</td>
+                            <td>{log.insertedRecords}</td>
+                            <td>{log.updatedRecords}</td>
                         </tr>
                     ))}
                 </tbody>

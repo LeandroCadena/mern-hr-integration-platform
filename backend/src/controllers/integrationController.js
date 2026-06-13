@@ -114,6 +114,8 @@ const simulateProviderSync = async (req, res) => {
             companyId,
             status: "success",
             recordsProcessed: employeesToUpsert.length,
+            insertedRecords: result.upsertedCount,
+            updatedRecords: result.modifiedCount,
             triggeredBy: req.user._id,
         });
 
