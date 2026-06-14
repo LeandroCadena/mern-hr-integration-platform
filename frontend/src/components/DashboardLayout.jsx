@@ -31,16 +31,18 @@ const DashboardLayout = ({ children, title }) => {
             </aside>
 
             <main className="dashboard-content">
-                <header className="dashboard-header">
-                    <div>
-                        <h1>{title}</h1>
-                        <p>Welcome, {user?.name}</p>
-                    </div>
+                <div className="page-container">
+                    <header className="dashboard-header">
+                        <div>
+                            <h1>{title}</h1>
+                            <p>Welcome, {user?.name}</p>
+                        </div>
 
-                    <span className="role-badge">{user?.role}</span>
-                </header>
+                        <span className="role-badge">{user?.role}</span>
+                    </header>
 
-                {children}
+                    {children}
+                </div>
             </main>
         </div>
     );

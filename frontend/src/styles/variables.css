@@ -1,0 +1,20 @@
+:root {
+    --bg-main: #020617;
+    --bg-panel: rgba(15, 23, 42, 0.78);
+    --bg-panel-soft: rgba(30, 41, 59, 0.55);
+
+    --border: rgba(148, 163, 184, 0.22);
+    --border-blue: rgba(59, 130, 246, 0.45);
+
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+
+    --blue: #2563eb;
+    --purple: #9333ea;
+    --cyan: #38bdf8;
+
+    --radius-lg: 22px;
+    --radius-md: 14px;
+
+    --shadow-glow: 0 0 35px rgba(37, 99, 235, 0.18);
+}

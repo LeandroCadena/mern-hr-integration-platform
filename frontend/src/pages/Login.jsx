@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "../styles/login.css";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -22,33 +23,57 @@ const Login = () => {
     };
 
     return (
-        <div>
-            <h1>HR Integration Platform</h1>
-            <h2>Login</h2>
+        <div className="login-page">
+            <div className="login-decoration left">
+                <div className="floating-card">Employees<br /><strong>1,246</strong></div>
+                <div className="floating-card small">HR Data</div>
+            </div>
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                    />
-                </div>
+            <div className="login-card">
+                <div className="login-icon">🔗</div>
 
-                <div>
-                    <label>Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                    />
-                </div>
+                <h1>
+                    <span>HR</span> Integration Platform
+                </h1>
 
-                {error && <p>{error}</p>}
+                <p className="subtitle">
+                    Connect your HR systems. Sync your people. Simplify your workflow.
+                </p>
 
-                <button type="submit">Login</button>
-            </form>
+                <h2>Welcome back</h2>
+                <p className="login-helper">Please sign in to continue</p>
+
+                <form onSubmit={handleSubmit} className="login-form">
+                    <div className="login-input-group">
+                        <label>Email</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                        />
+                    </div>
+
+                    <div className="login-input-group">
+                        <label>Password</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+                        />
+                    </div>
+
+                    {error && <p className="login-error">{error}</p>}
+
+                    <button type="submit" className="login-button">
+                        Login →
+                    </button>
+                </form>
+            </div>
+
+            <div className="login-decoration right">
+                <div className="floating-card">Integrations<br /><strong>23</strong></div>
+                <div className="floating-card small">Secure Sync</div>
+            </div>
         </div>
     );
 };
