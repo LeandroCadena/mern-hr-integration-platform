@@ -14,7 +14,29 @@ const {
 
 const app = express();
 app.use(helmet());
-app.use(cors());
+const allowedOrigins =
+    process.env.CLIENT_URLS ?
+    process.env.CLIENT_URLS
+    .split(",")
+    .map((url) => url.trim()) : [];
+
+console.log(
+    "Allowed Origins:",
+    allowedOrigins
+);
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+
+            return callback(new Error("Not allowed by CORS"));
+        },
+        credentials: true,
+    })
+);
 app.use(express.json());
 
 const authLimiter = rateLimit({
